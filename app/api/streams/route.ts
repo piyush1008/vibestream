@@ -33,10 +33,12 @@ export async function POST(req: NextRequest) {
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
         console.log("inside the create Stream" , res);
-
-
-        const thumbnails = res.thumbnail.thumbnails;
-        thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
+        let thumbnails;
+        if(res.thumbnail.thumbnails){
+             thumbnails = res.thumbnail.thumbnails;
+            thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
+        }
+        
 
         const existingActiveStream = await prismaClient.stream.count({
             where: {
