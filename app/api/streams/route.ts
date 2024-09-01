@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
         console.log("inside the create Stream" , res);
         let thumbnails;
-        if(res.thumbnail.thumbnails){
+        if(res.thumbnail){
              thumbnails = res.thumbnail.thumbnails;
             thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
         }
