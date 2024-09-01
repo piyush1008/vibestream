@@ -13,7 +13,7 @@ export default function Component() {
                 <h1>Please Log in....</h1>
             )
         }
-        return <StreamView creatorId={session.data.user.id} playVideo={true} />
+        return <StreamView creatorId={session.data.user.id} playVideo={true}  />
     } catch(e) {
         return null
     }

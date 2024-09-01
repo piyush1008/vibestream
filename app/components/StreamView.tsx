@@ -37,7 +37,7 @@ export default function StreamView({
 }: {
     creatorId: string;
     playVideo: boolean;
-    playedVideosIds:string[]
+    playedVideosIds?:string[]
 }) {
   const [inputLink, setInputLink] = useState('')
   const [queue, setQueue] = useState<Video[]>([])
