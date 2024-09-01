@@ -32,13 +32,19 @@ const REFRESH_INTERVAL_MS = 10 * 1000;
 
 export default function StreamView({
     creatorId,
-    playVideo = false
+    playVideo = false,
+    playedVideosIds=[]
 }: {
     creatorId: string;
     playVideo: boolean;
+    playedVideosIds:string[]
 }) {
   const [inputLink, setInputLink] = useState('')
   const [queue, setQueue] = useState<Video[]>([])
+
+  const [alreadyPlayed, setAlreadyPlayed]=useState(false);
+
+  const [historyVideos, setHistoryVideos]=useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null)
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
@@ -59,6 +65,25 @@ export default function StreamView({
         return json.activeStream.stream
     });
   }
+
+
+   // Fetch videos based on playedVideoIds
+   useEffect(() => {
+    console.log("Played Videos IDs:", playedVideosIds);
+    if (playedVideosIds.length > 0) {
+      const ids = playedVideosIds.join(",");
+    console.log("already played id are ", ids);
+      fetch(`/api/streams/alreadyplayed?id=${ids}`)
+        .then((res) => res.json())
+        .then((videos) => {
+          setHistoryVideos(videos);
+          setAlreadyPlayed(true);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch played videos:", err);
+        });
+    }
+  }, [playedVideosIds]);
 
   useEffect(() => {
     refreshStreams();
@@ -126,6 +151,13 @@ export default function StreamView({
   }
 
   const playNext = async () => {
+    if(currentVideo)
+    {
+        setHistoryVideos((prev)=>{
+            const newHistory=[currentVideo,...prev];
+            return newHistory.slice(0,4)
+        })
+    }
     if (queue.length > 0) {
         try {
             setPlayNextLoader(true)
@@ -143,7 +175,19 @@ export default function StreamView({
   }
 
   const handleShare = () => {
-    const shareableLink = `${window.location.hostname}/creator/${creatorId}`
+    const baseUrl = `${window.location.hostname}/creator/${creatorId}`;
+  
+    // Extract the IDs of the recently played videos
+    const playedVideoIds = historyVideos.map(video => video.id).join(',');
+  
+    // Append the IDs as a query parameter
+    const shareableLink = playedVideoIds
+      ? `${baseUrl}?played=${playedVideoIds}`
+      : baseUrl;
+
+      console.log("shareabale liknk ", shareableLink)
+  
+    // const shareableLink = `${window.location.hostname}/creator/${creatorId}`
     navigator.clipboard.writeText(shareableLink).then(() => {
       toast.success('Link copied to clipboard!', {
         position: "top-right",
@@ -167,8 +211,9 @@ export default function StreamView({
       })
     })
   }
-
-  return (
+  console.log(`Histoy videos  is ${historyVideos} and plyedVideos value is ${playVideo}`)
+  return ( 
+    
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
         <Appbar />
         <div className='flex justify-center'>
@@ -204,6 +249,56 @@ export default function StreamView({
                             </Card>
                         ))}
                     </div>
+                    <div className="space-y-6 mt-8">
+    {/* Existing code for Now Playing */}
+    {/* Add the Recently Played section here */}
+                        {alreadyPlayed && (
+                        <>
+                            {/* Recently Played Songs */}
+                            <h2 className="text-2xl font-bold text-white">Recently Played</h2>
+                            <div className="space-y-4">
+                            {historyVideos.map((video, index) => (
+                                <Card key={index} className="bg-gray-900 border-gray-800">
+                                <CardContent className="p-4 flex items-center space-x-4">
+                                    <img
+                                    src={video.smallImg}
+                                    alt={`Thumbnail for ${video.title}`}
+                                    className="w-30 h-20 object-cover rounded"
+                                    />
+                                    <div className="flex-grow">
+                                    <h3 className="font-semibold text-white">{video.title}</h3>
+                                    </div>
+                                </CardContent>
+                                </Card>
+                            ))}
+                            </div>
+                        </>
+                        )}
+
+                        {playVideo && (
+                        <>
+                            {/* Recently Played Songs */}
+                            <h2 className="text-2xl font-bold text-white">Recently Played</h2>
+                            <div className="space-y-4">
+                            {historyVideos.map((video, index) => (
+                                <Card key={index} className="bg-gray-900 border-gray-800">
+                                <CardContent className="p-4 flex items-center space-x-4">
+                                    <img
+                                    src={video.smallImg}
+                                    alt={`Thumbnail for ${video.title}`}
+                                    className="w-30 h-20 object-cover rounded"
+                                    />
+                                    <div className="flex-grow">
+                                    <h3 className="font-semibold text-white">{video.title}</h3>
+                                    </div>
+                                </CardContent>
+                                </Card>
+                            ))}
+                            </div>
+                        </>
+                        )}
+                    </div>
+
                 </div>
                 <div className='col-span-2'>
                     <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
