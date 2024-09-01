@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         console.log("inside the create stream");
 
         const extractedId = data.url.split("?v=")[1];
+        console.log("extracted", extractedId)
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
 
