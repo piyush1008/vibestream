@@ -5,6 +5,8 @@ import { z } from "zod";
 import youtubesearchapi from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+//@ts-ignore
+import youtube from "youtube-api"
 
 const CreateStreamSchema = z.object({
     creatorId: z.string(),
@@ -12,6 +14,61 @@ const CreateStreamSchema = z.object({
 });
 
 const MAX_QUEUE_LEN = 20;
+
+youtube.authenticate({
+    type: 'key',
+    key: process.env.YOUTUBE_API_KEY, // Replace with your API key
+  });
+
+// function getVideoThumbnails(videoId:any) {
+//     youtube.videos.list({
+//       part: 'snippet',
+//       id: videoId,
+//     }, (err:any, data:any) => {
+//       if (err) {
+//         console.error('Error fetching video details:', err);
+//         return;
+//       }
+//       console.log(data)
+//       console.log(data.data.items[0].snippet.title);
+//       console.log(data.data.items[0].snippet.thumbnails);
+//       return {
+//         title:data.data.items[0].snippet.title,
+//         thumbnails:data.data.items[0].snippet.thumbnails
+//       }
+//     });
+//   }
+
+  function getVideoThumbnails(videoId:any) {
+    return new Promise((resolve, reject) => {
+        youtube.videos.list({
+            part: 'snippet',
+            id: videoId,
+        }, (err:any, data:any) => {
+            if (err) {
+                console.error('Error fetching video details:', err);
+                reject(err);
+                return;
+            }
+
+            if (data.data.items.length === 0) {
+                console.log('No video found with the provided ID.');
+                reject(new Error('No video found'));
+                return;
+            }
+
+            // const video = data.data.items[0].snippet.title;
+            const title = data.data.items[0].snippet.title;
+            const thumbnails = data.data.items[0].snippet.thumbnails;
+
+            resolve({
+                title,
+                thumbnails
+            });
+        });
+    });
+}
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -31,6 +88,11 @@ export async function POST(req: NextRequest) {
         console.log("extracted", extractedId)
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
+
+        
+       const response=await getVideoThumbnails(extractedId); 
+        console.log("response from the new api",response)
+
 
         console.log("inside the create Stream" , res);
         let thumbnails;
