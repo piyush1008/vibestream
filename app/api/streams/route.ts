@@ -25,9 +25,14 @@ export async function POST(req: NextRequest) {
             })    
         }
 
+        console.log("inside the create stream");
+
         const extractedId = data.url.split("?v=")[1];
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
+
+        console.log("inside the create Stream" , res);
+
 
         const thumbnails = res.thumbnail.thumbnails;
         thumbnails.sort((a: {width: number}, b: {width: number}) => a.width < b.width ? -1 : 1);
@@ -38,6 +43,9 @@ export async function POST(req: NextRequest) {
             }
         })
 
+        console.log("inside the create Stream -2");
+
+
         if (existingActiveStream > MAX_QUEUE_LEN) {
             return NextResponse.json({
                 message: "Already at limit"
@@ -45,6 +53,10 @@ export async function POST(req: NextRequest) {
                 status: 411
             })
         }
+
+
+        console.log("inside the create Stream -3");
+
 
         const stream = await prismaClient.stream.create({
             data: {
@@ -57,7 +69,7 @@ export async function POST(req: NextRequest) {
                 bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg"
             }
         });
-
+        console.log("streams", stream)
         return NextResponse.json({
             ...stream,
             hasUpvoted: false,
