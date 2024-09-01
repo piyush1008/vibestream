@@ -75,8 +75,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+    try {
+        
+   
     const creatorId = req.nextUrl.searchParams.get("creatorId");
+
+    console.log("creatorID inside", creatorId)
     const session = await getServerSession();
+    console.log(session)
      // TODO: You can get rid of the db call here 
      const user = await prismaClient.user.findFirst({
         where: {
@@ -134,5 +140,13 @@ export async function GET(req: NextRequest) {
         })),
         activeStream
     })
+    } catch (error) {
+         console.log(error);
+         return NextResponse.json({
+            message: "Error"
+        }, {
+            status: 500
+        })
+    }
 }
  

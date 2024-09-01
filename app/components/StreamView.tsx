@@ -45,6 +45,7 @@ export default function StreamView({
   const videoPlayerRef = useRef<HTMLDivElement>();
 
   async function refreshStreams() {
+    console.log("creatorid", creatorId);
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
         credentials: "include"
     });

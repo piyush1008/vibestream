@@ -60,7 +60,18 @@ const handler = NextAuth({
                     id: dbUser.id
                 }
             }
-        }
+        },
+        async redirect({ url, baseUrl }:any) {
+            // Redirect to home page after sign-in
+            if(url==='/signin')
+            {
+                return baseUrl;
+            }
+            return baseUrl;
+        },
+    },
+    pages:{
+        signIn:"/signin"
     }
 })
 
