@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
         console.log("extracted", extractedId)
 
         const res = await youtubesearchapi.GetVideoDetails(extractedId);
+        console.log("res", res);
 
         
        const response=await getVideoThumbnails(extractedId); 
