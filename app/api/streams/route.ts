@@ -15,6 +15,20 @@ const CreateStreamSchema = z.object({
 
 const MAX_QUEUE_LEN = 20;
 
+interface Thumbnail {
+    url: string;
+    width: number;
+    height: number;
+}
+
+interface VideoDetails {
+    title: string;
+    thumbnails: {
+        [key: string]: Thumbnail;
+    };
+}
+
+
 youtube.authenticate({
     type: 'key',
     key: process.env.YOUTUBE_API_KEY, // Replace with your API key
@@ -39,7 +53,7 @@ youtube.authenticate({
 //     });
 //   }
 
-  function getVideoThumbnails(videoId:any) {
+  function getVideoThumbnails(videoId:any):Promise<VideoDetails> {
     return new Promise((resolve, reject) => {
         youtube.videos.list({
             part: 'snippet',
@@ -94,7 +108,9 @@ export async function POST(req: NextRequest) {
 
         
        const response=await getVideoThumbnails(extractedId); 
-        console.log("response from the new api",response)
+        console.log("response from the new api",response.title)
+        console.log("small img url",response.thumbnails.default.url);
+        console.log("large img url",response.thumbnails.high.url);
 
 
         console.log("inside the create Stream" , res);
@@ -132,7 +148,7 @@ export async function POST(req: NextRequest) {
                 url: data.url,
                 extractedId,
                 type: "Youtube",
-                title: res.title ?? "Cant find video",
+                title: response.title ?? "Cant find video",
                 smallImg: (thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : thumbnails[thumbnails.length - 1].url) ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
                 bigImg: thumbnails[thumbnails.length - 1].url ?? "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg"
             }
