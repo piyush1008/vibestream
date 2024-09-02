@@ -109,6 +109,7 @@ export async function POST(req: NextRequest) {
         
        const response=await getVideoThumbnails(extractedId); 
         console.log("response from the new api",response.title)
+        console.log("response thumnails",response.thumbnails)
         console.log("small img url",response.thumbnails.default.url);
         console.log("large img url",response.thumbnails.high.url);
 
